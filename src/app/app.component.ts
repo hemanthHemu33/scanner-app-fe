@@ -7,7 +7,7 @@ import { io } from 'socket.io-client';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  socket = io('http://localhost:3000');
+  socket = io('https://scaneer-app-be.onrender.com');
   tradeSignals: any[] = [];
   messages: string[] = [];
   selectedInterval: number = 60000;
@@ -133,7 +133,7 @@ export class AppComponent implements OnInit {
   }
 
   loadSignalHistory() {
-    fetch('http://localhost:3000/signal-history')
+    fetch('https://scaneer-app-be.onrender.com/signal-history')
       .then((res) => res.json())
       .then((data) => {
         this.signalHistory = data;
@@ -151,7 +151,7 @@ export class AppComponent implements OnInit {
   }
 
   setInterval() {
-    fetch('http://localhost:3000/set-interval', {
+    fetch('https://scaneer-app-be.onrender.com/set-interval', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ interval: this.selectedInterval }),
@@ -164,7 +164,7 @@ export class AppComponent implements OnInit {
   }
 
   fetchAvailableStocks() {
-    fetch('http://localhost:3000/instruments')
+    fetch('https://scaneer-app-be.onrender.com/instruments')
       .then((res) => res.json())
       .then((data) => {
         this.ngZone.run(() => {
@@ -192,7 +192,7 @@ export class AppComponent implements OnInit {
     const tokens = this.selectedStocks
       .map((stockStr) => this.stockTokenMap[stockStr])
       .filter((token) => token !== undefined);
-    fetch('http://localhost:3000/subscribe', {
+    fetch('https://scaneer-app-be.onrender.com/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tokens }),
