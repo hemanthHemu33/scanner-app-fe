@@ -8,7 +8,11 @@ import { environment } from '../environments/environment';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
+<<<<<<< HEAD
   socket = io(environment.apiUrl);
+=======
+  socket = io('https://scaneer-app-be.onrender.com');
+>>>>>>> e88c10ec4390232358e30c47e962dba278bfbd2a
   tradeSignals: any[] = [];
   messages: string[] = [];
   selectedInterval: number = 60000;
@@ -137,7 +141,11 @@ export class AppComponent implements OnInit {
   }
 
   loadSignalHistory() {
+<<<<<<< HEAD
     fetch(`${environment.apiUrl}/signal-history`)
+=======
+    fetch('https://scaneer-app-be.onrender.com/signal-history')
+>>>>>>> e88c10ec4390232358e30c47e962dba278bfbd2a
       .then((res) => res.json())
       .then((data) => {
         this.signalHistory = data;
@@ -155,7 +163,11 @@ export class AppComponent implements OnInit {
   }
 
   setInterval() {
+<<<<<<< HEAD
     fetch(`${environment.apiUrl}/set-interval`, {
+=======
+    fetch('https://scaneer-app-be.onrender.com/set-interval', {
+>>>>>>> e88c10ec4390232358e30c47e962dba278bfbd2a
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ interval: this.selectedInterval }),
@@ -168,7 +180,11 @@ export class AppComponent implements OnInit {
   }
 
   fetchAvailableStocks() {
+<<<<<<< HEAD
     fetch(`${environment.apiUrl}/instruments`)
+=======
+    fetch('https://scaneer-app-be.onrender.com/instruments')
+>>>>>>> e88c10ec4390232358e30c47e962dba278bfbd2a
       .then((res) => res.json())
       .then((data) => {
         this.ngZone.run(() => {
@@ -196,7 +212,11 @@ export class AppComponent implements OnInit {
     const tokens = this.selectedStocks
       .map((stockStr) => this.stockTokenMap[stockStr])
       .filter((token) => token !== undefined);
+<<<<<<< HEAD
     fetch(`${environment.apiUrl}/subscribe`, {
+=======
+    fetch('https://scaneer-app-be.onrender.com/subscribe', {
+>>>>>>> e88c10ec4390232358e30c47e962dba278bfbd2a
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tokens }),
