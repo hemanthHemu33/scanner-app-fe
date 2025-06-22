@@ -1,5 +1,6 @@
 import { Component, NgZone, OnInit } from '@angular/core';
 import { io } from 'socket.io-client';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -7,7 +8,7 @@ import { io } from 'socket.io-client';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  socket = io('http://localhost:3000');
+  socket = io(environment.apiUrl);
   tradeSignals: any[] = [];
   messages: string[] = [];
   selectedInterval: number = 60000;
@@ -24,10 +25,13 @@ export class AppComponent implements OnInit {
   };
   signalHistory: any = {};
   signalHistoryEntries: any[] = [];
+  stockSymbols: any;
+  stockSymbolsInDb: any;
 
   constructor(private ngZone: NgZone) {}
 
   ngOnInit() {
+    this.getStockSymbols();
     this.socket.on('connect', () => this.addMessage('✅ Connected to backend'));
     this.socket.on('serverMessage', (msg) => this.addMessage(`ℹ️ ${msg}`));
 
@@ -133,7 +137,7 @@ export class AppComponent implements OnInit {
   }
 
   loadSignalHistory() {
-    fetch('http://localhost:3000/signal-history')
+    fetch(`${environment.apiUrl}/signal-history`)
       .then((res) => res.json())
       .then((data) => {
         this.signalHistory = data;
@@ -151,7 +155,7 @@ export class AppComponent implements OnInit {
   }
 
   setInterval() {
-    fetch('http://localhost:3000/set-interval', {
+    fetch(`${environment.apiUrl}/set-interval`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ interval: this.selectedInterval }),
@@ -164,7 +168,7 @@ export class AppComponent implements OnInit {
   }
 
   fetchAvailableStocks() {
-    fetch('http://localhost:3000/instruments')
+    fetch(`${environment.apiUrl}/instruments`)
       .then((res) => res.json())
       .then((data) => {
         this.ngZone.run(() => {
@@ -192,7 +196,7 @@ export class AppComponent implements OnInit {
     const tokens = this.selectedStocks
       .map((stockStr) => this.stockTokenMap[stockStr])
       .filter((token) => token !== undefined);
-    fetch('http://localhost:3000/subscribe', {
+    fetch(`${environment.apiUrl}/subscribe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tokens }),
@@ -215,5 +219,70 @@ export class AppComponent implements OnInit {
     if (diffSec < 60) return `${diffSec}s ago`;
     const mins = Math.floor(diffSec / 60);
     return `${mins} min ago`;
+  }
+
+  addStockSymbols() {
+    // Convert the symbol to uppercase
+    this.stockSymbols = this.stockSymbols.toUpperCase();
+    const symbol = this.stockSymbols.trim(); // just in case
+
+    console.log('Adding stock symbol:', symbol);
+
+    fetch(`${environment.apiUrl}/addStockSymbol`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbol }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('Response from backend:', data);
+        this.stockSymbols = '';
+        this.getStockSymbols();
+      })
+      .catch((err) => console.error('Error adding stock symbol:', err.message));
+  }
+  // GET STOCK SYMBOLS
+  getStockSymbols() {
+    fetch(`${environment.apiUrl}/stockSymbols`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('Stock symbols:', data);
+        this.stockSymbolsInDb = data.symbols;
+        console.log('Stock symbols in DB:', this.stockSymbolsInDb);
+      })
+      .catch((err) =>
+        console.error('Error fetching stock symbols:', err.message)
+      );
+  }
+
+  removeStockSymbol(symbol: string) {
+    console.log('Removing stock symbol:', symbol);
+    // delete the stock symbol api call
+    fetch(`${environment.apiUrl}/stockSymbols/${symbol}`, {
+      method: 'DELETE',
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('Response from backend:', data);
+        this.getStockSymbols(); // refresh the list after deletion
+      })
+      .catch((err) =>
+        console.error('Error removing stock symbol:', err.message)
+      );
+  }
+
+  // CLEAR THE DATABASE
+  reset() {
+    console.log('Resetting the database...');
+    fetch(`${environment.apiUrl}/reset`, {
+      method: 'DELETE',
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('Response from backend:', data);
+        this.getStockSymbols(); // refresh the list after reset
+        this.addMessage('✅ Database reset successfully');
+      })
+      .catch((err) => console.error('Error resetting database:', err.message));
   }
 }

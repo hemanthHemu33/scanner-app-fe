@@ -1,5 +1,29 @@
-<h1>📊 Live Trade Scanner Dashboard</h1>
+<h1>
+  <button (click)="reset()">RESET</button>
+  📊 Live Trade Scanner Dashboard
+  <a
+    href="https://kite.zerodha.com/connect/login?v=3&api_key=9c2asbtjjrdrwn2z"
+    target="_blank"
+    >login</a
+  >
+</h1>
 <p>Total Signals: {{ tradeSignals.length }}</p>
+
+<!-- ADD STOCK SYMBOLS INPUT -->
+<div>
+  <input type="text" [(ngModel)]="stockSymbols" placeholder="stock symbol" />
+  <button (click)="addStockSymbols()">Add</button>
+</div>
+
+<!-- STOCK SYMBOLS LIST -->
+<h2>📈 Stock Symbols List</h2>
+<ul class="stock-symbols-list">
+  <li *ngFor="let symbol of stockSymbolsInDb">
+    {{ symbol }}
+    <button (click)="removeStockSymbol(symbol)">Remove</button>
+  </li>
+  <li *ngIf="stockSymbolsInDb?.length === 0">No symbols added yet.</li>
+</ul>
 
 <h2>🔥 Trade Signals</h2>
 <table *ngIf="tradeSignals.length > 0" id="signal-table">

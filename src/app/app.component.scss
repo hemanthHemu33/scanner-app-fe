@@ -108,3 +108,10 @@ tr:hover {
   color: red;
   font-weight: bold;
 }
+// ***********************
+.stock-symbols-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  // justify-content: center;
+}
