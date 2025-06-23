@@ -27,11 +27,13 @@ export class AppComponent implements OnInit {
   signalHistoryEntries: any[] = [];
   stockSymbols: any;
   stockSymbolsInDb: any;
+  signals: any;
 
   constructor(private ngZone: NgZone) {}
 
   ngOnInit() {
     this.getStockSymbols();
+    this.getSignals();
     this.socket.on('connect', () => this.addMessage('✅ Connected to backend'));
     this.socket.on('serverMessage', (msg) => this.addMessage(`ℹ️ ${msg}`));
 
@@ -133,17 +135,17 @@ export class AppComponent implements OnInit {
     this.socket.on('connect_error', (err) =>
       this.addMessage(`❌ Connection error: ${err.message}`)
     );
-    this.loadSignalHistory();
+    // this.loadSignalHistory();
   }
 
-  loadSignalHistory() {
-    fetch(`${environment.apiUrl}/signal-history`)
-      .then((res) => res.json())
-      .then((data) => {
-        this.signalHistory = data;
-        this.updateSignalHistoryEntries();
-      });
-  }
+  // loadSignalHistory() {
+  //   fetch(`${environment.apiUrl}/signal-history`)
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       this.signalHistory = data;
+  //       this.updateSignalHistoryEntries();
+  //     });
+  // }
 
   updateSignalHistoryEntries() {
     this.signalHistoryEntries = Object.values(this.signalHistory).flat();
@@ -284,5 +286,16 @@ export class AppComponent implements OnInit {
         this.addMessage('✅ Database reset successfully');
       })
       .catch((err) => console.error('Error resetting database:', err.message));
+  }
+
+  // get the signals
+  getSignals() {
+    fetch(`${environment.apiUrl}/signals`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('Signals:', data);
+        this.signals = data.signals;
+      })
+      .catch((err) => console.error('Error fetching signals:', err.message));
   }
 }
