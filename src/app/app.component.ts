@@ -49,6 +49,8 @@ export class AppComponent implements OnInit {
 
     this.socket.on('tradeSignal', (signal) => {
       this.ngZone.run(() => {
+        // call the signals API to get the latest signals
+        this.getSignals();
         if (Notification.permission === 'granted') {
           new Notification(`🚨 ${signal.stockName} - ${signal.pattern}`, {
             body: `Direction: ${signal.direction}\nEntry: ₹${signal.entry} | SL: ₹${signal.stopLoss}`,
@@ -294,7 +296,40 @@ export class AppComponent implements OnInit {
       .then((res) => res.json())
       .then((data) => {
         console.log('Signals:', data);
-        this.signals = data.signals;
+        // this.signals = data.signals;
+        // the want to display the signals in the UI same as the tradeSignals
+        this.signals = data.signals.map((signal: any) => {
+          signal.stockName =
+            this.stockNameMap[signal.stock] || `Token ${signal.stock}`;
+          signal.dateTime = new Date().toLocaleString();
+          signal.totalBuy = signal.liveTickData?.total_buy_quantity || 0;
+          signal.totalSell = signal.liveTickData?.total_sell_quantity || 0;
+          signal.bestBid = signal.liveTickData?.depth?.buy?.[0]?.price || null;
+          signal.bestAsk = signal.liveTickData?.depth?.sell?.[0]?.price || null;
+          signal.depthCheckPassed =
+            (!signal.bestBid ||
+              signal.direction !== 'Long' ||
+              signal.bestBid >= signal.entry) &&
+            (!signal.bestAsk ||
+              signal.direction !== 'Short' ||
+              signal.bestAsk <= signal.entry) &&
+            ((signal.direction === 'Long' &&
+              signal.totalBuy > signal.totalSell) ||
+              (signal.direction === 'Short' &&
+                signal.totalSell > signal.totalBuy));
+
+          // ✅ AI-enhanced summary fields
+          signal.ai = signal.ai || {};
+          signal.ai.explanation = signal.ai.explanation || 'N/A';
+          signal.ai.plan =
+            signal.ai.plan ||
+            `Buy at ₹${signal.entry}, SL ₹${signal.stopLoss}, TGT ₹${signal.target1}`;
+          signal.ai.confidenceReview =
+            signal.ai.confidenceReview || `Confidence: ${signal.confidence}`;
+          signal.ai.advisory =
+            signal.ai.advisory || 'Use proper risk management.';
+          return signal;
+        });
       })
       .catch((err) => console.error('Error fetching signals:', err.message));
   }
