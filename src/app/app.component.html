@@ -1,10 +1,10 @@
-<h1>
-  <button (click)="reset()">RESET</button>
+<h1 style="display: flex; align-items: center; justify-content: space-between">
+  <button (click)="reset()">🔄RESET</button>
   📊 Live Trade Scanner Dashboard
   <a
     href="https://kite.zerodha.com/connect/login?v=3&api_key=9c2asbtjjrdrwn2z"
     target="_blank"
-    >login</a
+    >⏻login</a
   >
 </h1>
 <p>Total Signals: {{ tradeSignals.length }}</p>
@@ -91,7 +91,7 @@
     <td>{{ entry.timestamp | date : "short" }}</td>
   </tr>
 </table> -->
-<table *ngIf="signals.length > 0" id="signal-table">
+<table *ngIf="signals?.length > 0" id="signal-table">
   <tr>
     <th>Stock</th>
     <th>Time</th>
