@@ -296,30 +296,79 @@ export class AppComponent implements OnInit {
       .then((res) => res.json())
       .then((data) => {
         console.log('Signals:', data);
-        // this.signals = data.signals;
-        // the want to display the signals in the UI same as the tradeSignals
+
+        const windowMs = 3 * 60 * 1000;
+
         this.signals = data.signals.map((signal: any) => {
+          // ✅ Stock name from map
           signal.stockName =
-            this.stockNameMap[signal.stock] || `Token ${signal.stock}`;
-          signal.dateTime = new Date().toLocaleString();
-          signal.totalBuy = signal.liveTickData?.total_buy_quantity || 0;
-          signal.totalSell = signal.liveTickData?.total_sell_quantity || 0;
-          signal.bestBid = signal.liveTickData?.depth?.buy?.[0]?.price || null;
-          signal.bestAsk = signal.liveTickData?.depth?.sell?.[0]?.price || null;
+            this.stockNameMap?.[signal.stock] || signal.stock || 'Unknown';
+
+          // ✅ Use generatedAt from DB for display
+          signal.dateTime = signal.generatedAt
+            ? new Date(signal.generatedAt).toLocaleString()
+            : 'N/A';
+
+          // ✅ Safely extract live tick + depth
+          const liveTick = signal.liveTickData || {};
+          const depth = liveTick.depth || {};
+          const buyDepth = Array.isArray(depth.buy) ? depth.buy : [];
+          const sellDepth = Array.isArray(depth.sell) ? depth.sell : [];
+
+          signal.totalBuy = liveTick.total_buy_quantity ?? 0;
+          signal.totalSell = liveTick.total_sell_quantity ?? 0;
+          signal.bestBid = buyDepth[0]?.price ?? null;
+          signal.bestAsk = sellDepth[0]?.price ?? null;
+
+          // ✅ Depth + orderflow check
           signal.depthCheckPassed =
-            (!signal.bestBid ||
-              signal.direction !== 'Long' ||
-              signal.bestBid >= signal.entry) &&
-            (!signal.bestAsk ||
-              signal.direction !== 'Short' ||
-              signal.bestAsk <= signal.entry) &&
+            signal.bestBid != null &&
+            signal.bestAsk != null &&
             ((signal.direction === 'Long' &&
+              signal.bestBid >= signal.entry &&
               signal.totalBuy > signal.totalSell) ||
               (signal.direction === 'Short' &&
+                signal.bestAsk <= signal.entry &&
                 signal.totalSell > signal.totalBuy));
 
-          // ✅ AI-enhanced summary fields
-          signal.ai = signal.ai || {};
+          // ✅ Extra signal metrics
+          signal.liveVWAP = liveTick.liveVWAP || null;
+          signal.liveRSI = liveTick.liveRSI || null;
+          signal.priceDeviation = liveTick.priceDeviation || null;
+
+          // ✅ Confidence grading
+          if (signal.spread <= 0.5 && signal.liquidity >= 1000) {
+            signal.confidence = 'High';
+          } else if (signal.spread <= 1 && signal.liquidity >= 500) {
+            signal.confidence = 'Medium';
+          } else {
+            signal.confidence = 'Low';
+          }
+
+          // ✅ Conflict check (based on existing history)
+          const recentHistory = this.signalHistory[signal.stock] || [];
+          const now = Date.now();
+          const conflicting = recentHistory.find(
+            (s: any) =>
+              now - s.timestamp < windowMs && s.direction !== signal.direction
+          );
+          signal.conflict = conflicting ? true : false;
+
+          // ✅ Maintain recent signal history
+          this.signalHistory[signal.stock] = recentHistory.filter(
+            (s: any) => now - s.timestamp < windowMs
+          );
+          this.signalHistory[signal.stock].push({
+            stock: signal.stockName,
+            pattern: signal.pattern,
+            direction: signal.direction,
+            timestamp: now, // ✅ used for conflict check only
+          });
+
+          // ✅ AI Summary Fields
+          if (typeof signal.ai !== 'object' || signal.ai === null) {
+            signal.ai = {};
+          }
           signal.ai.explanation = signal.ai.explanation || 'N/A';
           signal.ai.plan =
             signal.ai.plan ||
@@ -328,8 +377,11 @@ export class AppComponent implements OnInit {
             signal.ai.confidenceReview || `Confidence: ${signal.confidence}`;
           signal.ai.advisory =
             signal.ai.advisory || 'Use proper risk management.';
+
           return signal;
         });
+
+        this.updateSignalHistoryEntries();
       })
       .catch((err) => console.error('Error fetching signals:', err.message));
   }
