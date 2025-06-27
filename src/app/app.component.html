@@ -40,10 +40,10 @@
     <th>Qty</th>
     <th>ATR</th>
     <th>Confidence</th>
-    <th>Plan</th>
+    <!-- <th>Plan</th>
     <th>AI Explanation</th>
     <th>AI Review</th>
-    <th>AI Advice</th>
+    <th>AI Advice</th> -->
   </tr>
   <tr *ngFor="let s of tradeSignals">
     <td>{{ s.stockName }}</td>
@@ -60,11 +60,11 @@
     <td>{{ s.qty }}</td>
     <td>{{ s.atr }}</td>
     <td>{{ s.confidence }}</td>
-    <td>{{ s.ai?.plan }}</td>
+    <!-- <td>{{ s.ai?.plan }}</td>
     <td>{{ s.ai?.explanation }}</td>
     <td>
       <em>{{ s.ai?.confidenceReview }}</em>
-    </td>
+    </td> -->
     <td>{{ s.ai?.advisory }}</td>
     <!-- 
     <td><div [innerHTML]="s.ai?.plan | markdown"></div></td>
