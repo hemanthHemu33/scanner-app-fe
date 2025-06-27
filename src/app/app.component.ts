@@ -112,15 +112,15 @@ export class AppComponent implements OnInit {
         });
 
         // ✅ AI-enhanced summary fields
-        signal.ai = signal.ai || {};
-        signal.ai.explanation = signal.ai.explanation || 'N/A';
-        signal.ai.plan =
-          signal.ai.plan ||
-          `Buy at ₹${signal.entry}, SL ₹${signal.stopLoss}, TGT ₹${signal.target1}`;
-        signal.ai.confidenceReview =
-          signal.ai.confidenceReview || `Confidence: ${signal.confidence}`;
-        signal.ai.advisory =
-          signal.ai.advisory || 'Use proper risk management.';
+        // signal.ai = signal.ai || {};
+        // signal.ai.explanation = signal.ai.explanation || 'N/A';
+        // signal.ai.plan =
+        //   signal.ai.plan ||
+        //   `Buy at ₹${signal.entry}, SL ₹${signal.stopLoss}, TGT ₹${signal.target1}`;
+        // signal.ai.confidenceReview =
+        //   signal.ai.confidenceReview || `Confidence: ${signal.confidence}`;
+        // signal.ai.advisory =
+        //   signal.ai.advisory || 'Use proper risk management.';
 
         this.tradeSignals.unshift(signal);
         console.log('Received signal:', signal);
@@ -369,14 +369,14 @@ export class AppComponent implements OnInit {
           if (typeof signal.ai !== 'object' || signal.ai === null) {
             signal.ai = {};
           }
-          signal.ai.explanation = signal.ai.explanation || 'N/A';
-          signal.ai.plan =
-            signal.ai.plan ||
-            `Buy at ₹${signal.entry}, SL ₹${signal.stopLoss}, TGT ₹${signal.target1}`;
-          signal.ai.confidenceReview =
-            signal.ai.confidenceReview || `Confidence: ${signal.confidence}`;
-          signal.ai.advisory =
-            signal.ai.advisory || 'Use proper risk management.';
+          // signal.ai.explanation = signal.ai.explanation || 'N/A';
+          // signal.ai.plan =
+          //   signal.ai.plan ||
+          //   `Buy at ₹${signal.entry}, SL ₹${signal.stopLoss}, TGT ₹${signal.target1}`;
+          // signal.ai.confidenceReview =
+          //   signal.ai.confidenceReview || `Confidence: ${signal.confidence}`;
+          // signal.ai.advisory =
+          //   signal.ai.advisory || 'Use proper risk management.';
 
           return signal;
         });
